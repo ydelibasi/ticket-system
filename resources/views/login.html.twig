@@ -1,0 +1,16 @@
+{% extends 'layout.html.twig' %}
+{% set active = 'login' %}
+
+{% block content %}
+
+    <h2>{{ 'Giriş'|trans }}</h2>
+
+    <form action="{{ path('login_check') }}" method="post" novalidate {{ form_enctype(form) }} class="form-vertical">
+        {{ form_widget(form) }}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ 'Giriş'|trans }}</button>
+        </div>
+    </form>
+
+{% endblock %}
+

@@ -1,0 +1,51 @@
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>{{ 'Homepage' }}</title>
+
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <meta name="viewport" content="width=device-width">
+
+    <link rel="stylesheet" href="{{ app.request.basepath }}/assets/css/bootstrap.css">
+</head>
+<body>
+
+    {% set active = active|default(null) %}
+    <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+                <a class="brand" href="{{ path('homepage') }}">{{ 'Ticket System' }}</a>
+                <div class="nav-collapse">
+                    <ul class="nav">
+                        <li {% if 'homepage' == active %}class="active"{% endif %}><a href="{{ path('homepage') }}">{{ 'Homepage'|trans }}</a></li>
+                        {% if is_granted('ROLE_USER') %}
+                            <li><a href="{{ path('logout') }}">{{ 'Çıkış' }}</a></li>
+                        {% else %}
+                            <li {% if 'login' == active %}class="active"{% endif %}><a href="{{ path('login') }}">{{ 'Giriş'|trans }}</a></li>
+                            <li {% if 'register' == active %}class="active"{% endif %}><a href="#">{{ 'Kayıt Ol'|trans }}</a></li>
+                        {% endif %}
+                    </ul>
+                </div><!--/.nav-collapse -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="main" role="main" class="container">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <script src="{{ app.request.basepath }}/assets/js/jquery-1.11.3.min.js"></script>
+    <script src="{{ app.request.basepath }}/assets/js/scripts.js"></script>
+</body>
+</html>
