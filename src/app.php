@@ -20,7 +20,7 @@ use SilexAssetic\AsseticServiceProvider;
 use Symfony\Component\Security\Core\Encoder\PlaintextPasswordEncoder;
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 
-
+require_once __DIR__.'/../bootstrap.php';
 
 $app->register(new HttpCacheServiceProvider());
 

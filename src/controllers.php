@@ -32,7 +32,19 @@ $app->get('/user/{id}', function ($id) use ($app) {
         return $app->redirect('/');
     }
 
-    return  "<h1>hosgeldiniz {$user['name']} {$user['surname']}</h1>";
+    return $app['twig']->render(
+        'index.html.twig',
+        array('user' => $user)
+    );
+});
+
+$app->get('/users', function ()  use ($app, $em) {
+    $q = $em->createQuery("select u from TicketSystem\Model\User u");
+    $users = $q->getResult();
+
+    return $app['twig']->render('users.html.twig', array(
+        'users' => $users
+    ));
 });
 
 

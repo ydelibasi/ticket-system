@@ -15,7 +15,9 @@
     "symfony/translation"   : "~2.3",
     "symfony/twig-bridge"   : "~2.3",
     "symfony/validator"     : "~2.3",
-    "symfony/yaml"          : "~2.3"
+    "symfony/yaml"          : "~2.3",
+    "doctrine/dbal": "2.5.*",
+    "doctrine/orm": "2.5.1"
   },
   "scripts": {
     "post-install-cmd": "TicketSystem\\Composer\\Script::install",
