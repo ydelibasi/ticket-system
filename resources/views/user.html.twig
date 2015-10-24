@@ -1,0 +1,13 @@
+{% extends 'layout.html.twig' %}
+{% set active = 'user' %}
+
+{% block content %}
+    <h2>Hesabım</h2>
+
+    {% if app.security.token is not null and is_granted('ROLE_USER') %}
+        <h4>Hoşgeldiniz {{ app.security.token.username }}</h4><br />
+        <a href="{{ path('logout') }}">{{ 'Çıkış yap'|trans }}</a>
+    {% else %}
+        Giriş yapmak için <a href="{{ path('login') }}">{{ 'tıklayın'|trans }}</a>
+    {% endif %}
+{% endblock %}

@@ -5,7 +5,13 @@
 
     <h2>{{ 'Giriş'|trans }}</h2>
 
-    <form action="{{ path('login_check') }}" method="post" novalidate {{ form_enctype(form) }} class="form-vertical">
+    {% if error %}
+        <div class="alert alert-error">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form action="{{ path('user_login_check') }}" method="post" novalidate {{ form_enctype(form) }} class="form-vertical">
         {{ form_widget(form) }}
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">{{ 'Giriş'|trans }}</button>

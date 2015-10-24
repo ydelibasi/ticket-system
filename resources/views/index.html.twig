@@ -2,13 +2,6 @@
 {% set active = 'homepage' %}
 
 {% block content %}
-
     <h2>Ana Sayfa</h2>
-    {{ user.name }}
-    {% if is_granted('ROLE_USER') %}
-        Hello "{{ app.security.token.username }}".<br />
-        <a href="{{ path('logout') }}">{{ 'Logout' }}</a>
-    {% else %}
 
-    {% endif %}
 {% endblock %}

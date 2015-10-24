@@ -1,18 +1,22 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-    <h2>Users</h2>
-    <table>
+    <h2>Kullanıcılar</h2>
+    <table class="table table-striped">
         <tr>
-            <td>Id</td>
-            <td>Name</td>
-            <td>E-mail</td>
+            <th>Id</th>
+            <th>Adı</th>
+            <th>Soyadı</th>
+            <th>E-mail</th>
+            <th>Kullanıcı Adı</th>
         </tr>
         {% for user in users %}
             <tr>
                 <td>{{ user.id }}</td>
                 <td>{{ user.name }}</td>
+                <td>{{ user.surname }}</td>
                 <td>{{ user.email }}</td>
+                <td>{{ user.username }}</td>
             </tr>
         {% endfor %}
     </table>

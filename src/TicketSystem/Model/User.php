@@ -17,58 +17,58 @@ class User
 {
 
     /**
-     * @ORM\Id @ORM\Column(type="integer")
-     * @ORM\GeneratedValue
-     * @var integer
+     * @ORM\Column(type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
-    protected $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=150)
      *
      * @var string
      */
-    private $name;
+    public $name;
 
     /**
      * @ORM\Column(type="string", length=150)
      *
      * @var string
      */
-    private $surname;
+    public $surname;
 
     /**
      * @ORM\Column(type="string", length=20, unique=true)
      *
      * @var string
      */
-    private $username;
+    public $username;
 
     /**
-     * @ORM\Column(type="string", length=150, nullable=true)
+     * @ORM\Column(type="string", length=150)
      *
      * @var string
      */
-    private $email;
+    public $email;
 
     /**
      * @ORM\Column(type="string", length=50)
      *
      * @var string
      */
-    private $password;
+    public $password;
 
     /**
      * @ORM\Column(type="integer")
      * @var integer
      */
-    private $is_admin;
+    public $is_admin;
 
     /**
      * @ORM\Column(type="integer")
      * @var integer
      */
-    private $status;
+    public $status;
 
 
 
@@ -115,9 +115,6 @@ class User
 
     public function setEmail($email)
     {
-        if (FALSE === filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException('INVALID EMAIL');
-        }
         return $this->email = $email;
     }
 
@@ -137,6 +134,26 @@ class User
     public function setPassword($password)
     {
         return $this->password = $password;
+    }
+
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    public function setStatus($status = 1)
+    {
+        return $this->status = intval($status);
+    }
+
+    public function getIsAdmin()
+    {
+        return $this->is_admin;
+    }
+
+    public function setIsAdmin($isAdmin = 0)
+    {
+        return $this->is_admin = intval($isAdmin);
     }
 
 }

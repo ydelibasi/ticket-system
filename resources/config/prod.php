@@ -30,11 +30,3 @@ $app['assetic.input.path_to_js']        = array(
 );
 $app['assetic.output.path_to_js']       = 'js/scripts.js';
 
-// Doctrine (db)
-$app['db.options'] = array(
-    'driver'   => 'pdo_sqlite',
-    'path'     => __DIR__.'/../ticket.db'
-);
-
-// User
-$app['security.users'] = array('username' => array('ROLE_USER', 'password'));

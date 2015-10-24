@@ -35,7 +35,7 @@ $config->setMetadataCacheImpl($cache);
 $em = EntityManager::create(
     array(
         'driver'   => 'pdo_sqlite',
-        'path'     => __DIR__.'/resources/ticket.db'
+        'path'     => __DIR__.'/data/ticket.db'
     ),
     $config
 );

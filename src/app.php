@@ -22,8 +22,14 @@ use Symfony\Component\Translation\Loader\YamlFileLoader;
 
 require_once __DIR__.'/../bootstrap.php';
 
-$app->register(new HttpCacheServiceProvider());
+$q = $em->createQuery("select u from TicketSystem\Model\User u");
+$users = $q->getResult();
 
+foreach ($users as $user) {
+    $securityUsers[$user->username] = array('ROLE_USER', $user->password);
+}
+
+$app->register(new HttpCacheServiceProvider());
 $app->register(new SessionServiceProvider());
 $app->register(new ValidatorServiceProvider());
 $app->register(new FormServiceProvider());
@@ -31,19 +37,23 @@ $app->register(new UrlGeneratorServiceProvider());
 
 $app->register(new SecurityServiceProvider(), array(
     'security.firewalls' => array(
-        'admin' => array(
-            'pattern' => '^/',
-            'form'    => array(
-                'login_path'         => '/login',
+        'user' => array(
+            'pattern' => '^/user',
+            'form' => array(
+                'login_path' => '/login',
+                'check_path' => '/user/login_check',
                 'username_parameter' => 'form[username]',
                 'password_parameter' => 'form[password]',
-            ),
-            'logout'    => true,
-            'anonymous' => true,
-            'users'     => $app['security.users'],
+                ),
+            'logout' => array('logout_path' => '/user/logout'),
+            'users' => $securityUsers
         ),
+
     ),
 ));
+$app['security.access_rules'] = array(
+    array('^.*$', 'ROLE_USER'),
+);
 
 $app['security.encoder.digest'] = $app->share(function ($app) {
     return new PlaintextPasswordEncoder();
