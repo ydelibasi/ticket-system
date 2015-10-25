@@ -4,15 +4,17 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Constraints as Assert;
+use TicketSystem\Model\Category;
+use TicketSystem\Model\User;
+use TicketSystem\Model\Tickets;
 
 // Homepage Action
 $app->match('/', function () use ($app) {
-    return $app->redirect('/user');
     //return $app['twig']->render('index.html.twig');
+    return $app->redirect('/user');
 })->bind('homepage');
 
 $app->match('/user', function () use ($app) {
-
     return $app['twig']->render('user.html.twig');
 })->bind('user');
 
@@ -93,7 +95,90 @@ $app->match('/register', function (Request $request) use ($app, $em) {
         'form'  => $form->createView(),
         'error' => $app['security.last_error']($request),
     ));
-})->bind('register');;
+})->bind('register');
+
+// Ticket Add Action
+$app->match('/user/ticket/add', function (Request $request) use ($app, $em) {
+
+    $category = $em->getRepository('TicketSystem\Model\Category')->findAll();
+    foreach ($category as $key => $row) {
+        $categories[$key+1] = $row->name;
+    }
+    $priority = $em->getRepository('TicketSystem\Model\Priority')->findAll();
+    foreach ($priority as $key => $row) {
+        $priorities[$key+1] = $row->name;
+    }
+
+    $form = $app['form.factory']->createBuilder('form')
+        ->add('category', 'choice', array(
+            'label' => 'Kategori:',
+            'choices' => $categories,
+            'expanded' => false,
+        ))
+        ->add('priority', 'choice', array(
+            'label' => 'Öncelik:',
+            'choices' => $priorities,
+            'expanded' => false,
+        ))
+        ->add('title','text',array('label' => 'Konu:','constraints' => array(new Assert\NotBlank())))
+        ->add('desc','textarea',
+            array('label' => 'Açıklama:','constraints' => array(new Assert\NotBlank()), 'attr' => array('rows' => 5))
+        )
+        ->getForm();
+
+    $token = $app['security']->getToken();
+    if (null !== $token) {
+        $username = $token->getUser();
+        $user = $em->getRepository('TicketSystem\Model\User')->findBy(array('username' => $username));
+        if (count($user) > 0) {
+            $userId = $user[0]->id;
+        }
+    }
+    if (intval($userId) <= 0) {
+        $app['session']->getFlashBag()->add('error', 'Bu işlemi yapmaya yetkiniz yoktur.');
+    } else {
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+
+                $title = $form["title"]->getData();
+                $desc = $form["desc"]->getData();
+                $category = $form["category"]->getData();
+                $priority = $form["priority"]->getData();
+
+                $ticket = $em->getRepository('TicketSystem\Model\Tickets')->findBy(
+                    array('user_id' => $userId, 'title' => $title, 'category' => $category)
+                );
+                if (count($ticket) == 0) {
+                    $ticket = new Tickets();
+                    $ticket->setUserId($userId);
+                    $ticket->setTitle($title);
+                    $ticket->setDescription($desc);
+                    $ticket->setCategory($category);
+                    $ticket->setPriority($priority);
+                    $ticket->setStatus();
+                    $ticket->setCreateDate();
+                    $ticket->setUpdateDate();
+
+                    $em->persist($ticket);
+                    $em->flush();
+                    $app['session']->getFlashBag()->add('success', 'Ticket başarıyla eklendi.');
+                    return $app->redirect('/user/ticket/add');
+                } else {
+                    $app['session']->getFlashBag()->add('error', 'Bu ticket daha önceden açılmış.');
+                }
+            } else {
+                $app['session']->getFlashBag()->add('error', 'Lütfen girdiğiniz bilgileri kontrol ediniz.');
+            }
+        }
+    }
+
+    return $app['twig']->render('add_ticket.html.twig', array(
+        'form'  => $form->createView(),
+        'error' => $app['security.last_error']($request),
+    ));
+})->bind('user_ticket_add');
 
 
 $app->match('/users', function ()  use ($app, $em) {

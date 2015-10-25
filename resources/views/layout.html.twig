@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-    <title>{{ 'Homepage' }}</title>
+    <title>{{ 'Ticket Panel' }}</title>
 
     <meta name="description" content="">
     <meta name="author" content="">
@@ -22,12 +22,13 @@
     <div class="navbar navbar-fixed-top">
         <div class="navbar-inner">
             <div class="container">
-                <a class="brand" href="{{ path('homepage') }}">{{ 'Ticket System' }}</a>
+                <a class="brand" href="{{ path('homepage') }}">{{ 'Ticket Panel' }}</a>
                 <div class="nav-collapse">
                     <ul class="nav">
                         {% if app.security.token is not null and is_granted('ROLE_USER') %}
                             <li><a href="{{ path('user') }}">{{ 'Hesabım'|trans }}</a></li>
-                            <li><a href="{{ path('users') }}">{{ 'Kullanıcılar' }}</a></li>
+                            <li {% if 'user_ticket_add' == active %}class="active"{% endif %}><a href="{{ path('user_ticket_add') }}">{{ 'Ticket Ekle' }}</a></li>
+
                             <li><a href="{{ path('user_logout') }}">{{ 'Çıkış' }}</a></li>
                         {% else %}
                             <li {% if 'login' == active %}class="active"{% endif %}><a href="{{ path('login') }}">{{ 'Giriş'|trans }}</a></li>
