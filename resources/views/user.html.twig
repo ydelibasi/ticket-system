@@ -2,7 +2,7 @@
 {% set active = 'user' %}
 
 {% block content %}
-    <h2>Hesabım</h2>
+    <h3>Hesabım</h3>
 
     {% if app.security.token is not null and is_granted('ROLE_USER') %}
         <h4>Hoşgeldiniz {{ app.security.token.username }}</h4><br />

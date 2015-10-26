@@ -27,7 +27,9 @@ $users = $q->getResult();
 
 foreach ($users as $user) {
     $securityUsers[$user->username] = array('ROLE_USER', $user->password);
+    $appUsers[$user->id] = $user;
 }
+$app['users'] = $appUsers;
 
 $app->register(new HttpCacheServiceProvider());
 $app->register(new SessionServiceProvider());

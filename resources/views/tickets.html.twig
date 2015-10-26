@@ -1,0 +1,30 @@
+{% extends 'layout.html.twig' %}
+{% set active = 'user_tickets' %}
+{% block content %}
+    <h3>Tickets</h3>
+    {% if tickets is not empty %}
+        <table class="table table-striped">
+            <tr>
+                <th>Id</th>
+                <th>Başlık</th>
+                <th>Kategori</th>
+                <th>Öncelik</th>
+                <th>Durum</th>
+                <th>İşlemler</th>
+            </tr>
+
+            {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.id }}</td>
+                    <td>{{ ticket.title }}</td>
+                    <td>{{ categories[ticket.category] }}</td>
+                    <td>{{ priorities[ticket.priority] }}</td>
+                    <td>{% if ticket.status == 2 %} Çözüldü {% else %} Açık {% endif %}</td>
+                    <td><a class="btn btn-primary btn-small" href="{{ app.request.basepath }}/user/ticket/detail/{{ ticket.id }}" role="button">Detay</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h5>Ticket bulunamadı.</h5>
+    {% endif %}
+{% endblock %}

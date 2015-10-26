@@ -7,6 +7,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use TicketSystem\Model\Category;
 use TicketSystem\Model\User;
 use TicketSystem\Model\Tickets;
+use TicketSystem\Model\Answers;
 
 // Homepage Action
 $app->match('/', function () use ($app) {
@@ -101,12 +102,12 @@ $app->match('/register', function (Request $request) use ($app, $em) {
 $app->match('/user/ticket/add', function (Request $request) use ($app, $em) {
 
     $category = $em->getRepository('TicketSystem\Model\Category')->findAll();
-    foreach ($category as $key => $row) {
-        $categories[$key+1] = $row->name;
+    foreach ($category as $row) {
+        $categories[$row->id] = $row->name;
     }
     $priority = $em->getRepository('TicketSystem\Model\Priority')->findAll();
-    foreach ($priority as $key => $row) {
-        $priorities[$key+1] = $row->name;
+    foreach ($priority as $row) {
+        $priorities[$row->id] = $row->name;
     }
 
     $form = $app['form.factory']->createBuilder('form')
@@ -189,6 +190,112 @@ $app->match('/users', function ()  use ($app, $em) {
         'users' => $users
     ));
 })->bind('users');
+
+// Tickets Action
+
+$app->match('/user/tickets', function ()  use ($app, $em) {
+    $priority = $em->getRepository('TicketSystem\Model\Priority')->findAll();
+    foreach ($priority as $row) {
+        $priorities[$row->id] = $row->name;
+    }
+    $category = $em->getRepository('TicketSystem\Model\Category')->findAll();
+    foreach ($category as $key => $row) {
+        $categories[$row->id] = $row->name;
+    }
+    $token = $app['security']->getToken();
+    if (null !== $token) {
+        $username = $token->getUser();
+        $user = $em->getRepository('TicketSystem\Model\User')->findBy(array('username' => $username));
+        if (count($user) > 0) {
+            $user = $user[0];
+        }
+    }
+    if (intval($user->id) <= 0) {
+        $app['session']->getFlashBag()->add('error', 'Bu işlemi yapmaya yetkiniz yoktur.');
+    } else {
+        if ($user->is_admin == 1) {
+            $tickets = $em->getRepository('TicketSystem\Model\Tickets')->findAll();
+        } else {
+            $tickets = $em->getRepository('TicketSystem\Model\Tickets')->findBy(array('user_id' => $user->id));
+        }
+        return $app['twig']->render('tickets.html.twig', array(
+            'tickets' => $tickets, 'categories' => $categories, 'priorities' => $priorities
+        ));
+    }
+
+})->bind('user_tickets');
+
+// Ticket Detail Action
+
+$app->match('/user/ticket/detail/{id}', function (Request $request, $id)  use ($app, $em) {
+    $priority = $em->getRepository('TicketSystem\Model\Priority')->findAll();
+    foreach ($priority as $row) {
+        $priorities[$row->id] = $row->name;
+    }
+    $category = $em->getRepository('TicketSystem\Model\Category')->findAll();
+    foreach ($category as $key => $row) {
+        $categories[$row->id] = $row->name;
+    }
+    $token = $app['security']->getToken();
+    if (null !== $token) {
+        $username = $token->getUser();
+        $user = $em->getRepository('TicketSystem\Model\User')->findBy(array('username' => $username));
+        if (count($user) > 0) {
+            $user = $user[0];
+        }
+    }
+    if (intval($user->id) <= 0) {
+        $app['session']->getFlashBag()->add('error', 'Bu işlemi yapmaya yetkiniz yoktur.');
+        return $app['twig']->render('ticket_detail.html.twig', array(
+            'error' => $app['security.last_error']($request),
+        ));
+    } else {
+
+        $ticket = $em->getRepository('TicketSystem\Model\Tickets')->findBy(array('id' => intval($id)));
+        $userId = $ticket[0]->user_id;
+        $ticket = $ticket[0];
+        $ticket_user = $em->getRepository('TicketSystem\Model\User')->findBy(array('id' => intval($userId)));
+        $ticket_user = $ticket_user[0];
+        $answers = $em->getRepository('TicketSystem\Model\Answers')->findBy(
+            array('ticket_id' => intval($id)),array('id' => 'DESC')
+        );
+
+        $form = $app['form.factory']->createBuilder('form')
+            ->add('answer','textarea',
+                array('label' => 'Açıklama:','constraints' => array(new Assert\NotBlank()), 'attr' => array('rows' => 5))
+            )
+            ->getForm();
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $desc = $form["answer"]->getData();
+                $ticketAnswer = new Answers();
+                $ticketAnswer->setTicketId($ticket->id);
+                $ticketAnswer->setUserId($user->id);
+                $ticketAnswer->setDescription($desc);
+                $ticketAnswer->setCreateDate();
+                $ticketAnswer->setUpdateDate();
+
+                $em->persist($ticketAnswer);
+                $em->flush();
+                $app['session']->getFlashBag()->add('success', 'Cevap başarıyla eklendi.');
+                return $app->redirect("/user/ticket/detail/$id");
+
+            } else {
+                $app['session']->getFlashBag()->add('error', 'Lütfen girdiğiniz bilgileri kontrol ediniz.');
+            }
+        }
+
+        return $app['twig']->render('ticket_detail.html.twig', array(
+            'form'  => $form->createView(),
+            'error' => $app['security.last_error']($request),
+            'ticket' => $ticket, 'categories' => $categories, 'priorities' => $priorities, 'ticketuser' => $ticket_user,
+            'answers' => $answers, 'users' => $app['users']
+        ));
+    }
+
+});
 
 // Logout
 $app->match('/user/logout', function () use ($app) {

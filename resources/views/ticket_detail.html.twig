@@ -1,0 +1,54 @@
+{% extends 'layout.html.twig' %}
+{% set active = 'user_tickets' %}
+{% block content %}
+    <h3>Ticket Detayı</h3>
+    <table class="table">
+        <tr>
+            <td width="130px"><strong>Başlık </strong></td><td width="5px">:</td><td>{{ ticket.title }}</td>
+        </tr>
+        <tr>
+            <td><strong>Açıklama </strong></td><td>:</td><td>{{ ticket.description }}</td>
+        </tr>
+        <tr>
+            <td><strong>Ticketı Açan Kişi </strong></td><td>:</td><td>{{ ticketuser.name }} {{ ticketuser.surname }}</td>
+        </tr>
+        <tr>
+            <td><strong>Kategori </strong></td><td>:</td><td>{{ categories[ticket.category] }}</td>
+        </tr>
+        <tr>
+            <td><strong>Önceliği </strong></td><td>:</td><td>{{ priorities[ticket.priority] }}</td>
+        </tr>
+        <tr>
+            <td><strong>Eklenme Tarihi </strong></td><td>:</td><td>{{ ticket.create_date|date("d.m.Y H:i:s") }}</td>
+        </tr>
+        <tr>
+            <td><strong>Durumu </strong></td><td>:</td><td>{% if ticket.status == 2 %} Çözüldü {% else %} Açık {% endif %}</td>
+        </tr>
+    </table>
+
+    <h3>Cevap yaz</h3>
+    <form action="#" method="post" novalidate {{ form_enctype(form) }} class="form-vertical">
+        {{ form_widget(form) }}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ 'Kaydet'|trans }}</button>
+        </div>
+    </form>
+    <p><strong></strong></p>
+
+    {% if answers is not empty %}
+        <h3>Cevaplar</h3>
+        <table class="table table-striped">
+
+            {% for answer in answers %}
+                <tr>
+                    <td><p>
+                            <strong>{{ users[answer.user_id].name }} {{ users[answer.user_id].surname }}</strong> - {{ answer.create_date|date("d.m.Y H:i") }}<br/>
+                            {{ answer.description }}
+                        </p>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+{% endblock %}
