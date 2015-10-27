@@ -6,6 +6,8 @@ $app['session.default_locale'] = $app['locale'];
 $app['translator.messages'] = array(
     'tr' => __DIR__.'/../resources/locales/tr.yml',
 );
+define('MAX_FILE_UPLOAD_SIZE', 5 * 1024 * 1024); //5Mb
+
 // Cache
 $app['cache.path'] = __DIR__ . '/../cache';
 

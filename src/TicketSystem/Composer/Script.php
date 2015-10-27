@@ -10,6 +10,7 @@ class Script
         chmod('resources/log', 0777);
         chmod('public/assets', 0777);
         chmod('data', 0777);
+        chmod('data/upload', 0777);
         chmod('data/ticket.db', 0666);
         exec('php console assetic:dump');
     }

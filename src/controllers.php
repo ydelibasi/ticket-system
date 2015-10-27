@@ -125,6 +125,7 @@ $app->match('/user/ticket/add', function (Request $request) use ($app, $em) {
         ->add('desc','textarea',
             array('label' => 'Açıklama:','constraints' => array(new Assert\NotBlank()), 'attr' => array('rows' => 5))
         )
+        ->add('FileUpload', 'file', array('label' => 'Dosya:'))
         ->getForm();
 
     $token = $app['security']->getToken();
@@ -147,6 +148,26 @@ $app->match('/user/ticket/add', function (Request $request) use ($app, $em) {
                 $desc = $form["desc"]->getData();
                 $category = $form["category"]->getData();
                 $priority = $form["priority"]->getData();
+                $files = $request->files->get($form->getName());
+
+                $path = __DIR__.'/../data/upload/';
+                $filename = $files['FileUpload']->getClientOriginalName();
+
+                $ext = pathinfo($filename, PATHINFO_EXTENSION);
+                if (!in_array($ext, array('jpg', 'jpeg', 'png', 'gif', 'pdf', 'txt', 'doc','xls', 'xlsx'))) {
+                    $app['session']->getFlashBag()->add('error', 'Geçersiz bir dosya seçtiniz.');
+                    return $app->redirect('/user/ticket/add');
+                }
+
+                if ($_FILES['upload_file']['size'] > MAX_FILE_UPLOAD_SIZE) { // max: 5Mb
+                    $app['session']->getFlashBag()->add('error', 'Dosya boyutu 5MB\'dan fazla olmamalı.');
+                    return $app->redirect('/user/ticket/add');
+                }
+
+                $fileName = preg_replace('/[^a-zA-Z0-9\.]/ui','', $filename);
+                $fileName = date('YmdHis')."_".basename($fileName);
+
+                $files['FileUpload']->move($path,$fileName);
 
                 $ticket = $em->getRepository('TicketSystem\Model\Tickets')->findBy(
                     array('user_id' => $userId, 'title' => $title, 'category' => $category)
@@ -161,6 +182,7 @@ $app->match('/user/ticket/add', function (Request $request) use ($app, $em) {
                     $ticket->setStatus();
                     $ticket->setCreateDate();
                     $ticket->setUpdateDate();
+                    $ticket->setAttachmentFile($fileName);
 
                     $em->persist($ticket);
                     $em->flush();
