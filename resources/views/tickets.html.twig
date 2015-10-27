@@ -19,8 +19,13 @@
                     <td>{{ ticket.title }}</td>
                     <td>{{ categories[ticket.category] }}</td>
                     <td>{{ priorities[ticket.priority] }}</td>
-                    <td>{% if ticket.status == 2 %} Çözüldü {% else %} Açık {% endif %}</td>
-                    <td><a class="btn btn-primary btn-small" href="{{ app.request.basepath }}/user/ticket/detail/{{ ticket.id }}" role="button">Detay</a></td>
+                    <td style="font-weight: bold;">{% if ticket.status == 2 %} <span style="color: green;">Çözüldü</span> {% else %} Açık {% endif %}</td>
+                    <td>
+                        <a class="btn btn-primary btn-small" href="{{ app.request.basepath }}/user/ticket/detail/{{ ticket.id }}" role="button">Detay</a>
+                        {% if user.is_admin == 1 and ticket.status == 1 %}
+                            <a class="btn btn-success btn-small" href="{{ app.request.basepath }}/user/ticket/solve/{{ ticket.id }}" role="button" style="margin-left: 5px;">Çöz</a>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
         </table>

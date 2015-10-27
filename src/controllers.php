@@ -219,7 +219,7 @@ $app->match('/user/tickets', function ()  use ($app, $em) {
             $tickets = $em->getRepository('TicketSystem\Model\Tickets')->findBy(array('user_id' => $user->id));
         }
         return $app['twig']->render('tickets.html.twig', array(
-            'tickets' => $tickets, 'categories' => $categories, 'priorities' => $priorities
+            'tickets' => $tickets, 'categories' => $categories, 'priorities' => $priorities, 'user' => $user
         ));
     }
 
@@ -296,6 +296,38 @@ $app->match('/user/ticket/detail/{id}', function (Request $request, $id)  use ($
     }
 
 });
+
+// Ticket Solve Action
+
+$app->match('/user/ticket/solve/{id}', function ($id)  use ($app, $em) {
+
+    $token = $app['security']->getToken();
+    if (null !== $token) {
+        $username = $token->getUser();
+        $user = $em->getRepository('TicketSystem\Model\User')->findBy(array('username' => $username));
+        if (count($user) > 0) {
+            $user = $user[0];
+        }
+    }
+    if (intval($user->id) <= 0 || intval($user->is_admin) < 1) {
+        $app['session']->getFlashBag()->add('error', 'Bu işlemi yapmaya yetkiniz yoktur.');
+        return $app->redirect("/");
+    }
+
+    $ticket = $em->getRepository('TicketSystem\Model\Tickets')->find(intval($id));
+
+    if ($ticket->status == 2) {
+        $app['session']->getFlashBag()->add('error', 'Bu ticket zaten çözülmüş.');
+        return $app->redirect("/user/tickets");
+    }
+    $ticket->setStatus(2);
+    $ticket->setUpdateDate();
+    $em->flush();
+
+    $app['session']->getFlashBag()->add('success', 'Ticket çözüldü.');
+    return $app->redirect("/user/tickets");
+});
+
 
 // Logout
 $app->match('/user/logout', function () use ($app) {
