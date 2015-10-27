@@ -150,7 +150,6 @@ $app->match('/user/ticket/add', function (Request $request) use ($app, $em) {
                 $priority = $form["priority"]->getData();
                 $files = $request->files->get($form->getName());
 
-                $path = __DIR__.'/../data/upload/';
                 $filename = $files['FileUpload']->getClientOriginalName();
 
                 $ext = pathinfo($filename, PATHINFO_EXTENSION);
@@ -167,7 +166,7 @@ $app->match('/user/ticket/add', function (Request $request) use ($app, $em) {
                 $fileName = preg_replace('/[^a-zA-Z0-9\.]/ui','', $filename);
                 $fileName = date('YmdHis')."_".basename($fileName);
 
-                $files['FileUpload']->move($path,$fileName);
+                $files['FileUpload']->move(UPLOAD_DIR,$fileName);
 
                 $ticket = $em->getRepository('TicketSystem\Model\Tickets')->findBy(
                     array('user_id' => $userId, 'title' => $title, 'category' => $category)
@@ -308,12 +307,23 @@ $app->match('/user/ticket/detail/{id}', function (Request $request, $id)  use ($
                 $app['session']->getFlashBag()->add('error', 'Lütfen girdiğiniz bilgileri kontrol ediniz.');
             }
         }
+        $ticketFile = '';
+        $ticketImage = '';
+        if ($ticket->attacment_file != '' && is_file(UPLOAD_DIR.$ticket->attacment_file)) {
+            $ext = pathinfo(UPLOAD_DIR.$ticket->attacment_file, PATHINFO_EXTENSION);
+            if (in_array($ext, array('jpg', 'jpeg', 'png', 'gif'))) {
+                $data = file_get_contents(UPLOAD_DIR.$ticket->attacment_file);
+                $ticketImage = 'data:image/' . $ext . ';base64,' . base64_encode($data);
+            } else {
+                $ticketFile = $ticket->attacment_file;
+            }
+        }
 
         return $app['twig']->render('ticket_detail.html.twig', array(
             'form'  => $form->createView(),
             'error' => $app['security.last_error']($request),
             'ticket' => $ticket, 'categories' => $categories, 'priorities' => $priorities, 'ticketuser' => $ticket_user,
-            'answers' => $answers, 'users' => $app['users']
+            'answers' => $answers, 'users' => $app['users'], 'ticket_file' => $ticketFile, 'ticket_image' => $ticketImage
         ));
     }
 
@@ -348,6 +358,36 @@ $app->match('/user/ticket/solve/{id}', function ($id)  use ($app, $em) {
 
     $app['session']->getFlashBag()->add('success', 'Ticket çözüldü.');
     return $app->redirect("/user/tickets");
+});
+
+// download ticket file
+$app->match('/user/ticket/file/{filename}', function ($filename)  use ($app, $em) {
+
+    $token = $app['security']->getToken();
+    if (null !== $token) {
+        $username = $token->getUser();
+        $user = $em->getRepository('TicketSystem\Model\User')->findBy(array('username' => $username));
+        if (count($user) > 0) {
+            $user = $user[0];
+        }
+    }
+    $ticket = $em->getRepository('TicketSystem\Model\Tickets')->findBy(array('attacment_file' => $filename));
+    $ticket = $ticket[0];
+
+    if (intval($user->id) != intval($ticket->user_id) && intval($user->is_admin) < 1) {
+        $app['session']->getFlashBag()->add('error', 'Bu işlemi yapmaya yetkiniz yoktur.');
+        return $app['twig']->render('error.html.twig');
+    }
+    $file = UPLOAD_DIR.$filename;
+    if ($filename != '' && is_file($file)) {
+        $fileInfo = getimagesize($file);
+        header("Content-type: ".$fileInfo['mime']);
+        $result = readfile($file);
+        echo $result;
+    } else {
+        $app['session']->getFlashBag()->add('error', 'Dosya bulunamadı.');
+        return $app['twig']->render('error.html.twig');
+    }
 });
 
 
