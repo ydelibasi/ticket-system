@@ -3,12 +3,18 @@
 {% block content %}
     <h3>Tickets</h3>
     {% if tickets is not empty %}
+        <form action="#" method="post" novalidate {{ form_enctype(form) }} class="form-horizontal">
+            {{ form_widget(form) }}
+            <button type="submit" class="btn btn-primary" style="margin-left: 332px;">{{ 'Filtrele'|trans }}</button>
+        </form>
+
         <table class="table table-striped">
             <tr>
                 <th>Id</th>
                 <th>Başlık</th>
                 <th>Kategori</th>
                 <th>Öncelik</th>
+                <th>Eklenme Tarihi</th>
                 <th>Durum</th>
                 <th>İşlemler</th>
             </tr>
@@ -19,6 +25,7 @@
                     <td>{{ ticket.title }}</td>
                     <td>{{ categories[ticket.category] }}</td>
                     <td>{{ priorities[ticket.priority] }}</td>
+                    <td>{{ ticket.create_date|date('d.m.Y H:i') }}</td>
                     <td style="font-weight: bold;">{% if ticket.status == 2 %} <span style="color: green;">Çözüldü</span> {% else %} Açık {% endif %}</td>
                     <td>
                         <a class="btn btn-primary btn-small" href="{{ app.request.basepath }}/user/ticket/detail/{{ ticket.id }}" role="button">Detay</a>

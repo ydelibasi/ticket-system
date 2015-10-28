@@ -214,12 +214,14 @@ $app->match('/users', function ()  use ($app, $em) {
 
 // Tickets Action
 
-$app->match('/user/tickets', function ()  use ($app, $em) {
+$app->match('/user/tickets', function (Request $request)  use ($app, $em) {
     $priority = $em->getRepository('TicketSystem\Model\Priority')->findAll();
+    $priorities[0] = 'Seçiniz';
     foreach ($priority as $row) {
         $priorities[$row->id] = $row->name;
     }
     $category = $em->getRepository('TicketSystem\Model\Category')->findAll();
+    $categories[0] = 'Seçiniz';
     foreach ($category as $key => $row) {
         $categories[$row->id] = $row->name;
     }
@@ -234,13 +236,79 @@ $app->match('/user/tickets', function ()  use ($app, $em) {
     if (intval($user->id) <= 0) {
         $app['session']->getFlashBag()->add('error', 'Bu işlemi yapmaya yetkiniz yoktur.');
     } else {
-        if ($user->is_admin == 1) {
-            $tickets = $em->getRepository('TicketSystem\Model\Tickets')->findAll();
-        } else {
-            $tickets = $em->getRepository('TicketSystem\Model\Tickets')->findBy(array('user_id' => $user->id));
+        $form = $app['form.factory']->createBuilder('form')
+            ->add('category', 'choice', array(
+                'label' => 'Kategori:',
+                'choices' => $categories,
+                'expanded' => false,
+            ))
+            ->add('priority', 'choice', array(
+                'label' => 'Öncelik:',
+                'choices' => $priorities,
+                'expanded' => false,
+            ))
+            ->add('title','text',array('label' => 'Başlık:'))
+            ->add('create_date','date', array('label' => 'Eklenme Tarihi:','input' => 'string',
+                'widget' => 'single_text')
+            )
+            ->getForm();
+
+        $query = 'SELECT t from TicketSystem\Model\Tickets t';
+        $subQuery = '';
+        $params = array();
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+
+                $title = trim($form["title"]->getData());
+                $create_date = trim($form["create_date"]->getData());
+                $category = intval($form["category"]->getData());
+                $priority = intval($form["priority"]->getData());
+
+                if ($title != '') {
+                    $subQuery .= " WHERE t.title LIKE :title";
+                    $params['title'] =  "%$title%";
+                }
+                if (strtotime($create_date) !== false) {
+                    $subQuery .= ($subQuery != '') ? ' and' : ' WHERE';
+                    $subQuery .= " t.create_date >= :min_date";
+                    $subQuery .= " and t.create_date <= :max_date";
+                    $create_date = date('Y-m-d', strtotime($create_date));
+                    $params['min_date'] = $create_date.' 00:00:00';
+                    $params['max_date'] = $create_date.' 23:59:59';
+                }
+                if (intval($category) > 0) {
+                    $subQuery .= ($subQuery != '') ? ' and' : ' WHERE';
+                    $subQuery .= ' t.category = :category';
+                    $params['category'] =  $category;
+                }
+                if (intval($priority) > 0) {
+                    $subQuery .= ($subQuery != '') ? ' and' : ' WHERE';
+                    $subQuery .= ' t.priority = :priority';
+                    $params['priority'] =  $priority;
+                }
+            } else {
+                $app['session']->getFlashBag()->add('error', 'Lütfen girdiğiniz bilgileri kontrol ediniz.');
+            }
         }
+        if ($user->is_admin != 1) {
+            $subQuery .= ($subQuery != '') ? ' and' : ' WHERE';
+            $subQuery .= ' t.user_id = :user_id';
+            $params['user_id'] =  $user->id;
+        }
+
+        if ($subQuery != '') {
+            $app['monolog']->addDebug(sprintf('Ticket Query: %s Params:',$query.$subQuery,implode(',',$params)));
+            $query = $em->createQuery($query.$subQuery)->setParameters($params);
+            $tickets = $query->getResult();
+        } else {
+            $tickets = $em->getRepository('TicketSystem\Model\Tickets')->findAll();
+        }
+
         return $app['twig']->render('tickets.html.twig', array(
-            'tickets' => $tickets, 'categories' => $categories, 'priorities' => $priorities, 'user' => $user
+            'tickets' => $tickets, 'categories' => $categories, 'priorities' => $priorities, 'user' => $user,
+            'form' => $form->createView()
         ));
     }
 
