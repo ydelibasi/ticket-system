@@ -220,15 +220,19 @@ $app->match('/admin/categories', function (Request $request)  use ($app, $em) {
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
         if ($form->isValid()) {
-
             $category_name = trim($form["category"]->getData());
-            $category = New Category();
-            $category->setName($category_name);
+            $categoryObj = $em->getRepository('TicketSystem\Model\Category')->findBy(array('name' => $category_name));
+            if (count($categoryObj) == 0) {
+                $category = New Category();
+                $category->setName($category_name);
+                $em->persist($category);
+                $em->flush();
+                $app['session']->getFlashBag()->add('success', 'Kategori başarıyla eklendi.');
+                return $app->redirect("/admin/categories");
+            } else {
+                $app['session']->getFlashBag()->add('error', 'Bu kategori daha önceden eklenmiş.');
+            }
 
-            $em->persist($category);
-            $em->flush();
-            $app['session']->getFlashBag()->add('success', 'Kategori başarıyla eklendi.');
-            return $app->redirect("/admin/categories");
         } else {
             $app['session']->getFlashBag()->add('error', 'Lütfen girdiğiniz bilgileri kontrol ediniz.');
         }
