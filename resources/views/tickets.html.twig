@@ -30,7 +30,7 @@
                     <td>
                         <a class="btn btn-primary btn-small" href="{{ app.request.basepath }}/user/ticket/detail/{{ ticket.id }}" role="button">Detay</a>
                         {% if user.is_admin == 1 and ticket.status == 1 %}
-                            <a class="btn btn-success btn-small" href="{{ app.request.basepath }}/user/ticket/solve/{{ ticket.id }}" role="button" style="margin-left: 5px;">Çöz</a>
+                            <a class="btn btn-success btn-small" href="{{ app.request.basepath }}/admin/ticket/solve/{{ ticket.id }}" role="button" style="margin-left: 5px;">Çöz</a>
                         {% endif %}
                     </td>
                 </tr>

@@ -144,24 +144,26 @@ $app->match('/user/ticket/add', function (Request $request) use ($app, $em) {
                 $category = $form["category"]->getData();
                 $priority = $form["priority"]->getData();
                 $files = $request->files->get($form->getName());
+                $fileName = '';
+                if ($files['FileUpload'] !== null) {
+                    $filename = $files['FileUpload']->getClientOriginalName();
 
-                $filename = $files['FileUpload']->getClientOriginalName();
+                    $ext = pathinfo($filename, PATHINFO_EXTENSION);
+                    if (!in_array($ext, array('jpg', 'jpeg', 'png', 'gif', 'pdf', 'txt', 'doc','xls', 'xlsx'))) {
+                        $app['session']->getFlashBag()->add('error', 'Geçersiz bir dosya seçtiniz.');
+                        return $app->redirect('/user/ticket/add');
+                    }
 
-                $ext = pathinfo($filename, PATHINFO_EXTENSION);
-                if (!in_array($ext, array('jpg', 'jpeg', 'png', 'gif', 'pdf', 'txt', 'doc','xls', 'xlsx'))) {
-                    $app['session']->getFlashBag()->add('error', 'Geçersiz bir dosya seçtiniz.');
-                    return $app->redirect('/user/ticket/add');
+                    if ($_FILES['upload_file']['size'] > MAX_FILE_UPLOAD_SIZE) { // max: 5Mb
+                        $app['session']->getFlashBag()->add('error', 'Dosya boyutu 5MB\'dan fazla olmamalı.');
+                        return $app->redirect('/user/ticket/add');
+                    }
+
+                    $fileName = preg_replace('/[^a-zA-Z0-9\.]/ui','', $filename);
+                    $fileName = date('YmdHis')."_".basename($fileName);
+
+                    $files['FileUpload']->move(UPLOAD_DIR,$fileName);
                 }
-
-                if ($_FILES['upload_file']['size'] > MAX_FILE_UPLOAD_SIZE) { // max: 5Mb
-                    $app['session']->getFlashBag()->add('error', 'Dosya boyutu 5MB\'dan fazla olmamalı.');
-                    return $app->redirect('/user/ticket/add');
-                }
-
-                $fileName = preg_replace('/[^a-zA-Z0-9\.]/ui','', $filename);
-                $fileName = date('YmdHis')."_".basename($fileName);
-
-                $files['FileUpload']->move(UPLOAD_DIR,$fileName);
 
                 $ticket = $em->getRepository('TicketSystem\Model\Tickets')->findBy(
                     array('user_id' => $userId, 'title' => $title, 'category' => $category)
@@ -207,6 +209,7 @@ $app->match('/admin/users', function ()  use ($app, $em) {
     ));
 })->bind('admin_users');
 
+// Ticket Categories
 $app->match('/admin/categories', function (Request $request)  use ($app, $em) {
     $categories = $em->getRepository('TicketSystem\Model\Category')->findAll();
     $form = $app['form.factory']->createBuilder('form')
@@ -423,24 +426,14 @@ $app->match('/user/ticket/detail/{id}', function (Request $request, $id)  use ($
 
 // Ticket Solve Action
 
-$app->match('/user/ticket/solve/{id}', function ($id)  use ($app, $em) {
-
-    $token = $app['security']->getToken();
-    if (null !== $token) {
-        $username = $token->getUser();
-        $user = $em->getRepository('TicketSystem\Model\User')->findBy(array('username' => $username));
-        if (count($user) > 0) {
-            $user = $user[0];
-        }
-    }
-    if (intval($user->id) <= 0 || intval($user->is_admin) < 1) {
-        $app['session']->getFlashBag()->add('error', 'Bu işlemi yapmaya yetkiniz yoktur.');
-        return $app->redirect("/");
-    }
+$app->match('/admin/ticket/solve/{id}', function ($id)  use ($app, $em) {
 
     $ticket = $em->getRepository('TicketSystem\Model\Tickets')->find(intval($id));
 
-    if ($ticket->status == 2) {
+    if ($ticket === null) {
+        $app['session']->getFlashBag()->add('error', 'Ticket bulunamadı.');
+        return $app->redirect("/user/tickets");
+    } elseif ($ticket->status == 2) {
         $app['session']->getFlashBag()->add('error', 'Bu ticket zaten çözülmüş.');
         return $app->redirect("/user/tickets");
     }
