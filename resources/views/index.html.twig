@@ -3,9 +3,10 @@
 
 {% block content %}
     <h3>Ana Sayfa</h3>
-
-
-        <h4>Hoşgeldiniz giriş yapmak için <a href="{{ path('login') }}">tıklayın</a></h4>
-
-
+    {% if is_granted('ROLE_USER') %}
+        <h4>Hoşgeldiniz {{ app.security.token.username }}</h4><br />
+        <a href="{{ path('logout') }}">{{ 'Çıkış yap'|trans }}</a>
+    {% else %}
+        Giriş yapmak için <a href="{{ path('login') }}">{{ 'tıklayın'|trans }}</a>
+    {% endif %}
 {% endblock %}

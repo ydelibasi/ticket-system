@@ -26,7 +26,8 @@ $q = $em->createQuery("select u from TicketSystem\Model\User u");
 $users = $q->getResult();
 
 foreach ($users as $user) {
-    $securityUsers[$user->username] = array('ROLE_USER', $user->password);
+    $role = ($user->is_admin) ? 'ROLE_ADMIN' : 'ROLE_USER';
+    $securityUsers[$user->username] = array($role, $user->password);
     $appUsers[$user->id] = $user;
 }
 $app['users'] = $appUsers;
@@ -38,7 +39,7 @@ $app->register(new FormServiceProvider());
 $app->register(new UrlGeneratorServiceProvider());
 
 $app->register(new SecurityServiceProvider(), array(
-    'security.firewalls' => array(
+    /*'security.firewalls' => array(
         'user' => array(
             'pattern' => '^/user',
             'form' => array(
@@ -51,10 +52,37 @@ $app->register(new SecurityServiceProvider(), array(
             'users' => $securityUsers
         ),
 
+    ),*/
+    'security.firewalls' => array(
+        'login_path' => array(
+            'pattern' => '^/login$',
+            'anonymous' => true
+        ),
+        'default' => array(
+            'pattern' => '^/.*$',
+            'anonymous' => true,
+            'form' => array(
+                'login_path' => '/login',
+                'check_path' => '/login_check',
+                'username_parameter' => 'form[username]',
+                'password_parameter' => 'form[password]',
+            ),
+            'logout' => array(
+                'logout_path' => '/logout',
+                'invalidate_session' => false
+            ),
+            'users' => $securityUsers
+        )
     ),
+    'security.access_rules' => array(
+        array('^/login$', 'IS_AUTHENTICATED_ANONYMOUSLY'),
+        array('^/register$', 'IS_AUTHENTICATED_ANONYMOUSLY'),
+        array('^/admin', 'ROLE_ADMIN'),
+        array('^.*$', 'ROLE_USER'),
+    )
 ));
-$app['security.access_rules'] = array(
-    array('^.*$', 'ROLE_USER'),
+$app['security.role_hierarchy'] = array(
+    'ROLE_ADMIN' => array('ROLE_USER'),
 );
 
 $app['security.encoder.digest'] = $app->share(function ($app) {

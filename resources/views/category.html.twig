@@ -1,0 +1,25 @@
+{% extends 'layout.html.twig' %}
+{% set active = 'categories' %}
+{% block content %}
+    <h3>Kategori Ekle</h3>
+    <form action="#" method="post" novalidate {{ form_enctype(form) }} class="form-vertical">
+        {{ form_widget(form) }}
+        <button type="submit" class="btn btn-primary" >{{ 'Kaydet'|trans }}</button>
+    </form>
+    {% if categories is not empty %}
+        <h3>Ticket Kategorileri</h3>
+        <table class="table table-hover">
+            <tr>
+                <th>#</th>
+                <th>Adı</th>
+            </tr>
+            {% for category in categories %}
+                <tr>
+                    <td style="width: 20px;">{{ category.id }}</td>
+                    <td>{{ category.name }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+{% endblock %}
+

@@ -25,15 +25,17 @@
                 <a class="brand" href="{{ path('homepage') }}">{{ 'Ticket Panel' }}</a>
                 <div class="nav-collapse">
                     <ul class="nav">
-                        {% if app.security.token is not null and is_granted('ROLE_USER') %}
-                            <li><a href="{{ path('user') }}">{{ 'Hesabım'|trans }}</a></li>
+                        {% if is_granted('ROLE_USER') %}
                             <li {% if 'user_ticket_add' == active %}class="active"{% endif %}><a href="{{ path('user_ticket_add') }}">{{ 'Ticket Ekle' }}</a></li>
                             <li {% if 'user_tickets' == active %}class="active"{% endif %}><a href="{{ path('user_tickets') }}">{{ 'Tickets' }}</a></li>
-
-                            <li><a href="{{ path('user_logout') }}">{{ 'Çıkış' }}</a></li>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <li {% if 'users' == active %}class="active"{% endif %}><a href="{{ path('admin_users') }}">{{ 'Kullanıcılar' }}</a></li>
+                                <li {% if 'categories' == active %}class="active"{% endif %}><a href="{{ path('admin_categories') }}">{{ 'Kategoriler' }}</a></li>
+                            {% endif %}
+                            <li><a href="{{ path('logout') }}">{{ 'Çıkış' }}</a></li>
                         {% else %}
                             <li {% if 'login' == active %}class="active"{% endif %}><a href="{{ path('login') }}">{{ 'Giriş'|trans }}</a></li>
-                            <li {% if 'register' == active %}class="active"{% endif %}><a href="{{ path('register') }}">{{ 'Kayıt'|trans }}</a></li>
+                            <li {% if 'register' == active %}class="active"{% endif %}><a href="{{ path('register') }}">{{ 'Kayıt Ol'|trans }}</a></li>
                         {% endif %}
                     </ul>
                 </div><!--/.nav-collapse -->

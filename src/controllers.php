@@ -11,13 +11,8 @@ use TicketSystem\Model\Answers;
 
 // Homepage Action
 $app->match('/', function () use ($app) {
-    //return $app['twig']->render('index.html.twig');
-    return $app->redirect('/user');
+    return $app['twig']->render('index.html.twig');
 })->bind('homepage');
-
-$app->match('/user', function () use ($app) {
-    return $app['twig']->render('user.html.twig');
-})->bind('user');
 
 // Login Action
 $app->match('/login', function (Request $request) use ($app, $em) {
@@ -203,14 +198,43 @@ $app->match('/user/ticket/add', function (Request $request) use ($app, $em) {
 })->bind('user_ticket_add');
 
 
-$app->match('/users', function ()  use ($app, $em) {
+$app->match('/admin/users', function ()  use ($app, $em) {
     $q = $em->createQuery("select u from TicketSystem\Model\User u");
     $users = $q->getResult();
 
     return $app['twig']->render('users.html.twig', array(
         'users' => $users
     ));
-})->bind('users');
+})->bind('admin_users');
+
+$app->match('/admin/categories', function (Request $request)  use ($app, $em) {
+    $categories = $em->getRepository('TicketSystem\Model\Category')->findAll();
+    $form = $app['form.factory']->createBuilder('form')
+        ->add('category','text',
+            array('label' => 'Kategori Adı:','constraints' => array(new Assert\NotBlank()))
+        )
+        ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted()) {
+        if ($form->isValid()) {
+
+            $category_name = trim($form["category"]->getData());
+            $category = New Category();
+            $category->setName($category_name);
+
+            $em->persist($category);
+            $em->flush();
+            $app['session']->getFlashBag()->add('success', 'Kategori başarıyla eklendi.');
+            return $app->redirect("/admin/categories");
+        } else {
+            $app['session']->getFlashBag()->add('error', 'Lütfen girdiğiniz bilgileri kontrol ediniz.');
+        }
+    }
+
+    return $app['twig']->render('category.html.twig', array(
+        'categories' => $categories, 'form' => $form->createView()
+    ));
+})->bind('admin_categories');
 
 // Tickets Action
 
@@ -460,7 +484,7 @@ $app->match('/user/ticket/file/{filename}', function ($filename)  use ($app, $em
 
 
 // Logout
-$app->match('/user/logout', function () use ($app) {
+$app->match('/logout', function () use ($app) {
     $app['session']->clear();
 
     return $app->redirect('/');
