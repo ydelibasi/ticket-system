@@ -38,14 +38,15 @@
     </table>
     <a class="btn btn-primary" href="{{ path('user_tickets') }}" role="button">Geri Dön</a>
 
-    <h3>Cevap yaz</h3>
-    <form action="#" method="post" novalidate {{ form_enctype(form) }} class="form-vertical">
-        {{ form_widget(form) }}
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">{{ 'Kaydet'|trans }}</button>
-        </div>
-    </form>
-    <p><strong></strong></p>
+
+    <div class="page-header">
+        <h3>Cevap yaz</h3>
+    </div>
+    <div class="col-sm-3">
+        <form action="#" method="post" novalidate {{ form_enctype(form) }} class="form-horizontal">
+            {{ form_widget(form) }}
+        </form>
+    </div><div class="clearfix"></div>
 
     {% if answers is not empty %}
         <h3>Cevaplar</h3>

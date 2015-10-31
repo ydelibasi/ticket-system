@@ -26,7 +26,16 @@ $app->match('/login', function (Request $request) use ($app, $em) {
             )
         )
         ->add('password',
-            'password', array('label' => 'Şifre:','constraints' => array(new Assert\NotBlank()))
+            'password', array(
+                'label' => 'Şifre:',
+                'constraints' => array(new Assert\NotBlank())
+            )
+        )
+        ->add('login-btn','submit',
+            array(
+                'label' => 'Giriş yap',
+                'attr' => array('class' => 'btn-lg btn-primary btn-block')
+            )
         )
         ->getForm();
 
@@ -55,6 +64,12 @@ $app->match('/register', function (Request $request) use ($app, $em) {
                 'label' => 'Şifre:','constraints' => array(new Assert\NotBlank(), new Assert\Length(array('min' => 6)))
             )
         )
+        ->add('register-btn','submit',
+            array(
+                'label' => 'Kayıt Ol',
+                'attr' => array('class' => 'btn-success')
+            )
+        )
         ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
@@ -78,6 +93,7 @@ $app->match('/register', function (Request $request) use ($app, $em) {
 
                 $em->persist($user);
                 $em->flush();
+                $app['session']->getFlashBag()->add('success', 'Kayıt işlemi başarıyla gerçekleşti. Giriş yapabilirsiniz.');
                 return $app->redirect('/login');
             } else {
                 $app['session']->getFlashBag()->add('error', 'Bu kullanıcı adı daha önceden kullanılmış.');
@@ -121,6 +137,12 @@ $app->match('/user/ticket/add', function (Request $request) use ($app, $em) {
             array('label' => 'Açıklama:','constraints' => array(new Assert\NotBlank()), 'attr' => array('rows' => 5))
         )
         ->add('FileUpload', 'file', array('label' => 'Dosya:'))
+        ->add('register-btn','submit',
+            array(
+                'label' => 'Kaydet',
+                'attr' => array('class' => 'btn-success')
+            )
+        )
         ->getForm();
 
     $token = $app['security']->getToken();
@@ -216,6 +238,12 @@ $app->match('/admin/categories', function (Request $request)  use ($app, $em) {
         ->add('category','text',
             array('label' => 'Kategori Adı:','constraints' => array(new Assert\NotBlank()))
         )
+        ->add('register-btn','submit',
+            array(
+                'label' => 'Kaydet',
+                'attr' => array('class' => 'btn-success')
+            )
+        )
         ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
@@ -281,6 +309,12 @@ $app->match('/user/tickets', function (Request $request)  use ($app, $em) {
             ->add('title','text',array('label' => 'Başlık:'))
             ->add('create_date','date', array('label' => 'Eklenme Tarihi:','input' => 'string',
                 'widget' => 'single_text')
+            )
+            ->add('filter-btn','submit',
+                array(
+                    'label' => 'Filtrele',
+                    'attr' => array('class' => 'btn-primary')
+                )
             )
             ->getForm();
 
@@ -383,6 +417,12 @@ $app->match('/user/ticket/detail/{id}', function (Request $request, $id)  use ($
         $form = $app['form.factory']->createBuilder('form')
             ->add('answer','textarea',
                 array('label' => 'Açıklama:','constraints' => array(new Assert\NotBlank()), 'attr' => array('rows' => 5))
+            )
+            ->add('register-btn','submit',
+                array(
+                    'label' => 'Kaydet',
+                    'attr' => array('class' => 'btn-success')
+                )
             )
             ->getForm();
 

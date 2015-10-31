@@ -1,14 +1,17 @@
 {% extends 'layout.html.twig' %}
 {% set active = 'categories' %}
 {% block content %}
-    <h3>Kategori Ekle</h3>
-    <form action="#" method="post" novalidate {{ form_enctype(form) }} class="form-vertical">
-        {{ form_widget(form) }}
-        <button type="submit" class="btn btn-primary" >{{ 'Kaydet'|trans }}</button>
-    </form>
+    <div class="page-header">
+        <h3>Kategori Ekle</h3>
+    </div>
+    <div class="col-sm-2">
+        <form action="#" method="post" novalidate {{ form_enctype(form) }} class="form-horizontal">
+            {{ form_widget(form) }}
+        </form>
+    </div><div class="clearfix"></div>
     {% if categories is not empty %}
         <h3>Ticket Kategorileri</h3>
-        <table class="table table-hover">
+        <table class="table table-striped">
             <tr>
                 <th>#</th>
                 <th>Adı</th>

@@ -6,49 +6,83 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-
     <title>{{ 'Ticket Panel' }}</title>
-
     <meta name="description" content="">
     <meta name="author" content="">
-
     <meta name="viewport" content="width=device-width">
-
-    <link rel="stylesheet" href="{{ app.request.basepath }}/assets/css/bootstrap.css">
+    <link rel="icon" href="{{ app.request.basepath }}/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="{{ app.request.basepath }}/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ app.request.basepath }}/assets/css/style.css">
 </head>
 <body>
 
     {% set active = active|default(null) %}
-    <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
-            <div class="container">
-                <a class="brand" href="{{ path('homepage') }}">{{ 'Ticket Panel' }}</a>
-                <div class="nav-collapse">
-                    <ul class="nav">
-                        {% if is_granted('ROLE_USER') %}
-                            <li {% if 'user_ticket_add' == active %}class="active"{% endif %}><a href="{{ path('user_ticket_add') }}">{{ 'Ticket Ekle' }}</a></li>
-                            <li {% if 'user_tickets' == active %}class="active"{% endif %}><a href="{{ path('user_tickets') }}">{{ 'Tickets' }}</a></li>
-                            {% if is_granted('ROLE_ADMIN') %}
-                                <li {% if 'users' == active %}class="active"{% endif %}><a href="{{ path('admin_users') }}">{{ 'Kullanıcılar' }}</a></li>
-                                <li {% if 'categories' == active %}class="active"{% endif %}><a href="{{ path('admin_categories') }}">{{ 'Kategoriler' }}</a></li>
-                            {% endif %}
-                            <li><a href="{{ path('logout') }}">{{ 'Çıkış' }}</a></li>
-                        {% else %}
-                            <li {% if 'login' == active %}class="active"{% endif %}><a href="{{ path('login') }}">{{ 'Giriş'|trans }}</a></li>
-                            <li {% if 'register' == active %}class="active"{% endif %}><a href="{{ path('register') }}">{{ 'Kayıt Ol'|trans }}</a></li>
-                        {% endif %}
-                    </ul>
-                </div><!--/.nav-collapse -->
+    <nav class="navbar navbar-inverse navbar-static-top">
+        <!-- We use the fluid option here to avoid overriding the fixed width of a normal container within the narrow content columns. -->
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#header" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <img class="logo" src="/img/logo.png" alt="Ticket Panel">
+                <a class="navbar-brand" href="{{ path('homepage') }}">Ticket Panel</a>
+
             </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="header">
+                <ul class="nav navbar-nav">
+                    {% if is_granted('ROLE_USER') %}
+                        <li {% if 'homepage' == active %}class="active"{% endif %}>
+                            <a href="{{ path('homepage') }}">
+                                <span class="glyphicon glyphicon-home" aria-hidden="true"></span> Anasayfa
+                            </a>
+                        </li>
+                        <li {% if 'user_ticket_add' == active %}class="active"{% endif %}>
+                            <a href="{{ path('user_ticket_add') }}">
+                                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Ticket Oluştur
+                            </a>
+                        </li>
+                        <li {% if 'user_tickets' == active %}class="active"{% endif %}>
+                            <a href="{{ path('user_tickets') }}">
+                                <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>
+                                {% if is_granted('ROLE_ADMIN') %} Ticketlar{% else %} Ticketlarım{% endif %}
+                            </a>
+                        </li>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <li {% if 'users' == active %}class="active"{% endif %}>
+                                <a href="{{ path('admin_users') }}">
+                                    <span class="glyphicon glyphicon-user" aria-hidden="true"></span> Kullanıcılar
+                                </a>
+                            </li>
+                            <li {% if 'categories' == active %}class="active"{% endif %}>
+                                <a href="{{ path('admin_categories') }}">
+                                    <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span> Kategoriler
+                                </a></li>
+                        {% endif %}
+                        <li>
+                            <a href="{{ path('logout') }}">
+                                <span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span> Çıkış
+                            </a>
+                        </li>
+                    {% else %}
+                        <li {% if 'login' == active %}class="active"{% endif %}><a href="{{ path('login') }}">{{ 'Giriş yap'|trans }}</a></li>
+                        <li {% if 'register' == active %}class="active"{% endif %}><a href="{{ path('register') }}">{{ 'Kayıt Ol'|trans }}</a></li>
+                    {% endif %}
+                </ul>
+            </div><!-- /.navbar-collapse -->
         </div>
-    </div>
+    </nav>
 
     <div class="container">
         <div id="main" role="main" class="container">
-            {% set alertTypeAvaillable = [ 'info', 'success', 'warning', 'error'] %}
+            {% set alertTypeAvaillable = [ 'info', 'success', 'warning', 'danger', 'error'] %}
             {% for alert in alertTypeAvaillable %}
                 {% for message in app.session.getFlashBag.get(alert) %}
-                    <div class="alert alert-{{ alert }}" >
+                    <div class="alert alert-{% if 'error' == alert %}danger{% else %}{{ alert }}{% endif %} " >
                         <button class="close" data-dismiss="alert">×</button>
                         {{ message|trans }}
                     </div>
@@ -60,6 +94,6 @@
     </div>
 
     <script src="{{ app.request.basepath }}/assets/js/jquery-1.11.3.min.js"></script>
-    <script src="{{ app.request.basepath }}/assets/js/scripts.js"></script>
+    <script src="{{ app.request.basepath }}/assets/js/bootstrap.min.js"></script>
 </body>
 </html>

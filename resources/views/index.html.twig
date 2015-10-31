@@ -2,10 +2,12 @@
 {% set active = 'homepage' %}
 
 {% block content %}
-    <h3>Ana Sayfa</h3>
+    <div class="page-header">
+        <h2>Ana Sayfa</h2>
+    </div>
+
     {% if is_granted('ROLE_USER') %}
-        <h4>Hoşgeldiniz {{ app.security.token.username }}</h4><br />
-        <a href="{{ path('logout') }}">{{ 'Çıkış yap'|trans }}</a>
+        <h4>Hoşgeldiniz <strong>{{ app.security.token.username }}</strong></h4>
     {% else %}
         Giriş yapmak için <a href="{{ path('login') }}">{{ 'tıklayın'|trans }}</a>
     {% endif %}

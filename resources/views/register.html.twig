@@ -2,15 +2,14 @@
 {% set active = 'register' %}
 
 {% block content %}
-
-    <h3>{{ 'Kayıt'|trans }}</h3>
-
-    <form action="#" method="post" novalidate {{ form_enctype(form) }} class="form-vertical">
+<div class="page-header">
+    <h3>Kayıt</h3>
+</div>
+<div class="col-sm-3">
+    <form action="#" method="post" novalidate {{ form_enctype(form) }} class="form-horizontal">
         {{ form_widget(form) }}
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">{{ 'Kaydet'|trans }}</button>
-        </div>
     </form>
+</div>
 
 {% endblock %}
 

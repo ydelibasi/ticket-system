@@ -1,11 +1,13 @@
 {% extends 'layout.html.twig' %}
 {% set active = 'user_tickets' %}
 {% block content %}
-    <h3>Tickets</h3>
+    <div class="page-header">
+        <h3>{% if is_granted('ROLE_ADMIN') %}Ticketlar{% else %}Ticketlarım{% endif %}</h3>
+    </div>
     {% if tickets is not empty %}
-        <form action="#" method="post" novalidate {{ form_enctype(form) }} class="form-horizontal">
-            {{ form_widget(form) }}
-            <button type="submit" class="btn btn-primary" style="margin-left: 332px;">{{ 'Filtrele'|trans }}</button>
+        <form action="#" method="post" novalidate {{ form_enctype(form) }} class="form-inline" id="filter-ticket">
+            {#{{ form_widget(form) }}#}
+            {{ form(form, { 'attr': {'class': 'form-inline'} }) }}
         </form>
 
         <table class="table table-striped">
@@ -28,9 +30,11 @@
                     <td>{{ ticket.create_date|date('d.m.Y H:i') }}</td>
                     <td style="font-weight: bold;">{% if ticket.status == 2 %} <span style="color: green;">Çözüldü</span> {% else %} Açık {% endif %}</td>
                     <td>
-                        <a class="btn btn-primary btn-small" href="{{ app.request.basepath }}/user/ticket/detail/{{ ticket.id }}" role="button">Detay</a>
+                        <a class="btn btn-info btn-sm" href="{{ app.request.basepath }}/user/ticket/detail/{{ ticket.id }}" role="button">
+                            <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Detayı</a>
                         {% if user.is_admin == 1 and ticket.status == 1 %}
-                            <a class="btn btn-success btn-small" href="{{ app.request.basepath }}/admin/ticket/solve/{{ ticket.id }}" role="button" style="margin-left: 5px;">Çöz</a>
+                            <a class="btn btn-success btn-sm" href="{{ app.request.basepath }}/admin/ticket/solve/{{ ticket.id }}" role="button" style="margin-left: 5px;">
+                                <span class="glyphicon glyphicon-ok-sign" aria-hidden="true"></span> Çöz</a>
                         {% endif %}
                     </td>
                 </tr>
