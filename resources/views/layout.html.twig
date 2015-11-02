@@ -65,12 +65,20 @@
                         {% endif %}
                         <li>
                             <a href="{{ path('logout') }}">
-                                <span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span> Çıkış
+                                <span class="glyphicon glyphicon-log-out  " aria-hidden="true"></span> Çıkış
                             </a>
                         </li>
                     {% else %}
-                        <li {% if 'login' == active %}class="active"{% endif %}><a href="{{ path('login') }}">{{ 'Giriş yap'|trans }}</a></li>
-                        <li {% if 'register' == active %}class="active"{% endif %}><a href="{{ path('register') }}">{{ 'Kayıt Ol'|trans }}</a></li>
+                        <li {% if 'login' == active %}class="active"{% endif %}>
+                            <a href="{{ path('login') }}">
+                                <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> {{ 'Giriş yap'|trans }}
+                            </a>
+                        </li>
+                        <li {% if 'register' == active %}class="active"{% endif %}>
+                            <a href="{{ path('register') }}">
+                                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> {{ 'Kayıt Ol'|trans }}
+                            </a>
+                        </li>
                     {% endif %}
                 </ul>
             </div><!-- /.navbar-collapse -->

@@ -18,7 +18,10 @@
     margin-right: 15px;
 }
 .navbar-inverse .navbar-nav>li>a {
-    color: #bbb;
+    color: #fff;
+}
+.navbar-inverse .navbar-nav>li>a:hover {
+    color: #ccc;
 }
 .page-header {
     padding-bottom: 0;
@@ -43,7 +46,7 @@
 /* Login Form */
 
 .form-signin {
-    max-width: 330px;
+    max-width: 280px;
     padding: 20px 15px 10px 15px;
     margin: 30px auto;
     background-color: #eee;
@@ -96,4 +99,15 @@
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;
     border-bottom: 1px solid #ddd;
+}
+
+/* Responsive styles */
+
+@media (max-width: 767px) {
+    .container-fluid>.navbar-header {
+        margin-left: 10px;
+    }
+    .navbar-inverse .navbar-brand {
+        padding-left: 0;
+    }
 }
