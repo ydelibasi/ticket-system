@@ -14,8 +14,8 @@ $loader->add('TicketSystem', __DIR__.'/src');
 
 //doctrine
 $config = new Configuration();
-//$cache = new Cache();
-$cache = new \Doctrine\Common\Cache\ApcCache();
+$cache = new Cache();
+//$cache = new \Doctrine\Common\Cache\ArrayCache();
 $config->setQueryCacheImpl($cache);
 $config->setProxyDir('/tmp');
 $config->setProxyNamespace('EntityProxy');
