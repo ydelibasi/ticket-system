@@ -5,7 +5,7 @@
     <form action="{{ path('login_check') }}" method="post" novalidate {{ form_enctype(form) }} class="form-signin">
         {% if error %}
             <div class="alert alert-danger">
-                {{ error }}
+                {{ error |trans}}
             </div>
         {% endif %}
         {{ form_widget(form) }}
