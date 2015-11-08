@@ -78,7 +78,8 @@ $app->match('/register', function (Request $request) use ($app, $em) {
             $name = $form["name"]->getData();
             $surname = $form["surname"]->getData();
             $username = $form["username"]->getData();
-            $password = $form["password"]->getData();
+            $formPassword = $form["password"]->getData();
+            $password = $app['security.encoder.digest']->encodePassword($formPassword, '');
             $email = $form["email"]->getData();
             $user = $em->getRepository('TicketSystem\Model\User')->findBy(array('username' => $username));
             if (count($user) == 0) {
@@ -90,6 +91,7 @@ $app->match('/register', function (Request $request) use ($app, $em) {
                 $user->setPassword($password);
                 $user->setStatus();
                 $user->setIsAdmin();
+                $user->setRoles();
 
                 $em->persist($user);
                 $em->flush();
@@ -414,6 +416,12 @@ $app->match('/user/ticket/detail/{id}', function (Request $request, $id)  use ($
             array('ticket_id' => intval($id)),array('id' => 'DESC')
         );
 
+        $q = $em->createQuery("select u from TicketSystem\Model\User u");
+        $users = $q->getResult();
+        foreach ($users as $user) {
+            $appUsers[$user->id] = $user;
+        }
+
         $form = $app['form.factory']->createBuilder('form')
             ->add('answer','textarea',
                 array('label' => 'Açıklama:','constraints' => array(new Assert\NotBlank()), 'attr' => array('rows' => 5))
@@ -462,7 +470,7 @@ $app->match('/user/ticket/detail/{id}', function (Request $request, $id)  use ($
             'form'  => $form->createView(),
             'error' => $app['security.last_error']($request),
             'ticket' => $ticket, 'categories' => $categories, 'priorities' => $priorities, 'ticketuser' => $ticket_user,
-            'answers' => $answers, 'users' => $app['users'], 'ticket_file' => $ticketFile, 'ticket_image' => $ticketImage
+            'answers' => $answers, 'users' => $appUsers, 'ticket_file' => $ticketFile, 'ticket_image' => $ticketImage
         ));
     }
 

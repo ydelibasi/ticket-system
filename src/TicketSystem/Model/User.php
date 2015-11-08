@@ -52,7 +52,7 @@ class User
     public $email;
 
     /**
-     * @ORM\Column(type="string", length=50)
+     * @ORM\Column(type="string", length=150)
      *
      * @var string
      */
@@ -70,7 +70,12 @@ class User
      */
     public $status;
 
-
+    /**
+     * @ORM\Column(type="string", length=150)
+     *
+     * @var string
+     */
+    public $roles = 'ROLE_USER';
 
     public function __construct()
     {
@@ -154,6 +159,16 @@ class User
     public function setIsAdmin($isAdmin = 0)
     {
         return $this->is_admin = intval($isAdmin);
+    }
+
+    public function getRoles()
+    {
+        return $this->roles;
+    }
+
+    public function setRoles($role = 'ROLE_USER')
+    {
+        return $this->roles = $role;
     }
 
 }

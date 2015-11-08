@@ -16,26 +16,23 @@ use Silex\Provider\TranslationServiceProvider;
 use Silex\Provider\TwigServiceProvider;
 use Silex\Provider\UrlGeneratorServiceProvider;
 use Silex\Provider\ValidatorServiceProvider;
-use Symfony\Component\Security\Core\Encoder\PlaintextPasswordEncoder;
 use Symfony\Component\Translation\Loader\YamlFileLoader;
+use Symfony\Component\Security\Core\Encoder\MessageDigestPasswordEncoder;
 
 require_once __DIR__.'/../bootstrap.php';
-
-$q = $em->createQuery("select u from TicketSystem\Model\User u");
-$users = $q->getResult();
-
-foreach ($users as $user) {
-    $role = ($user->is_admin) ? 'ROLE_ADMIN' : 'ROLE_USER';
-    $securityUsers[$user->username] = array($role, $user->password);
-    $appUsers[$user->id] = $user;
-}
-$app['users'] = $appUsers;
 
 $app->register(new HttpCacheServiceProvider());
 $app->register(new SessionServiceProvider());
 $app->register(new ValidatorServiceProvider());
 $app->register(new FormServiceProvider());
 $app->register(new UrlGeneratorServiceProvider());
+
+$app->register(new Silex\Provider\DoctrineServiceProvider(), array(
+    'db.options' => array(
+        'driver' => 'pdo_sqlite',
+        'path'     => '../data/ticket.db'
+    ),
+));
 
 $app->register(new SecurityServiceProvider(), array(
     'security.firewalls' => array(
@@ -56,7 +53,9 @@ $app->register(new SecurityServiceProvider(), array(
                 'logout_path' => '/logout',
                 'invalidate_session' => false
             ),
-            'users' => $securityUsers
+            'users' => $app->share(function() use ($app) {
+                return new \TicketSystem\UserProvider($app['db']);
+            }),
         )
     ),
     'security.access_rules' => array(
@@ -71,7 +70,7 @@ $app['security.role_hierarchy'] = array(
 );
 
 $app['security.encoder.digest'] = $app->share(function ($app) {
-    return new PlaintextPasswordEncoder();
+    return new MessageDigestPasswordEncoder('sha1', false, 1);
 });
 
 $app->register(new TranslationServiceProvider());
@@ -102,6 +101,6 @@ $app->register(new TwigServiceProvider(), array(
 if ($app['debug'] && isset($app['cache.path'])) {
     $app->register(new ServiceControllerServiceProvider());
 }
-$app->register(new Silex\Provider\DoctrineServiceProvider());
+
 
 return $app;
